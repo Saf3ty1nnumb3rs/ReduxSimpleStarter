@@ -1,15 +1,41 @@
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { Provider } from 'react-redux';
-import { createStore, applyMiddleware } from 'redux';
+import React, { Component } from "react";
+import ReactDOM from "react-dom";
+import YTSearch from "youtube-api-search";
+import SearchBar from "./components/search_bar";
+import VideoList from './components/video_list';
+import VideoDetail from './components/video_detail';
 
-import App from './components/app';
-import reducers from './reducers';
+const API_KEY = "AIzaSyC5RsdCFuSIu1vMOJCS5QuHMNHfUb2TjOY";
 
-const createStoreWithMiddleware = applyMiddleware()(createStore);
 
-ReactDOM.render(
-  <Provider store={createStoreWithMiddleware(reducers)}>
-    <App />
-  </Provider>
-  , document.querySelector('.container'));
+//Create a new component. This should produce HTML.
+class App extends Component {
+    constructor(props){
+        super(props);
+        this.state = {
+            videos: [],
+            selectedVideo: null
+        }
+        YTSearch({ key: API_KEY, term: "hotdogs" }, (videos) => {
+            this.setState( { 
+                videos: videos,
+                selectedVideo: videos[0]
+             } );
+          });
+    }
+  render() {
+    return (
+      <div>
+        <SearchBar />
+        <VideoDetail video={this.state.selectedVideo} />
+        <VideoList 
+        onVideoSelect={selectedVideo => this.setState({ selectedVideo })}
+        videos={this.state.videos} />
+      </div>
+    );
+  }
+}
+
+// Take this components generated HTML and put it on the page (DOM)
+
+ReactDOM.render(<App />, document.querySelector(".container"));
